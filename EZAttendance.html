@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZAttend - Attendance Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background-color: #3498db;
+            color: #ffffff;
+            text-align: center;
+            padding: 1em 0;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .calculator-section {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        pre {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>EZAttend - Attendance Calculator</h1>
+        <p>Manage your attendance with EZAttend</p>
+    </header>
+
+    <div class="calculator-section">
+        <label for="calculationMethod">Choose calculation method:</label>
+        <select id="calculationMethod" onchange="toggleInputs()">
+            <option value="1">Calculate by date</option>
+            <option value="2">Calculate by number of lectures</option>
+        </select>
+
+        <div id="dateInputFields" style="display: none;">
+            <label for="startDate">Enter the start date:</label>
+            <input type="date" id="startDate" name="startDate">
+
+            <label for="endDate">Enter the end date:</label>
+            <input type="date" id="endDate" name="endDate">
+        </div>
+
+        <div id="lecturesInputFields" style="display: none;">
+            <label for="totalLectures">Enter the total number of lectures:</label>
+            <input type="text" id="totalLectures" name="totalLectures" placeholder="Enter Here">
+
+            <label for="lecturesAttended">Enter the number of lectures attended:</label>
+            <input type="text" id="lecturesAttended" name="lecturesAttended" placeholder="Enter Here">
+
+            <label for="percentage">Enter the minimum attendance percentage:</label>
+            <input type="text" id="percentage" name="percentage" placeholder="Enter Here">
+        </div>
+
+        <button onclick="calculateAttendance()">Calculate Attendance</button>
+
+        <pre id="resultArea"></pre>
+    </div>
+
+    <script>
+        function toggleInputs() {
+            const calculationMethod = document.getElementById('calculationMethod').value;
+            const dateInputs = document.getElementById('dateInputFields');
+            const lecturesInputs = document.getElementById('lecturesInputFields');
+
+            if (calculationMethod === '1') {
+                dateInputs.style.display = 'block';
+                lecturesInputs.style.display = 'none';
+            } else {
+                dateInputs.style.display = 'none';
+                lecturesInputs.style.display = 'block';
+            }
+        }
+
+        function calculateAttendance() {
+            const calculationMethod = document.getElementById('calculationMethod').value;
+            const resultArea = document.getElementById('resultArea');
+            resultArea.textContent = ''; // Clear previous results
+
+            if (calculationMethod === '1') {
+                const n = parseInt(prompt('Enter total number of days:'), 10);
+                const l = parseInt(prompt('Enter number of lectures each day:'), 10);
+                const min = parseInt(prompt('Enter minimum attendance required:'), 10);
+
+                const miss = n * l;
+
+                const ap = parseInt(prompt('Enter total lectures attended in the past:'), 10);
+                const lp = parseInt(prompt('Enter total lectures happened in the past:'), 10);
+
+                const attend1 = (ap / lp) * 100;
+                const upt = miss + lp;
+                const attend = (ap / upt) * 100;
+
+                alert(`Your earlier attendance was ${attend1.toFixed(2)}%\nYour future attendance will be ${attend.toFixed(2)}%`);
+
+                if (attend >= min) {
+                    const bunk1 = Math.round(Math.abs((ap / min) * 100 - upt));
+                    alert(`Congrats!! Your attendance is above the minimum required percentage.\nYou can skip below number of lectures to maintain the minimum percentage: ${bunk1}`);
+                } else {
+                    const bunk = Math.round(Math.abs((100 * ap - min * upt) / (min - 100)));
+                    alert(`Uhh-Ohh!! Your attendance is below the minimum attendance required.\nYou have to attend below number of classes to maintain the minimum required percentage: ${bunk}`);
+                }
+            } else {
+                // Calculate by number of lectures
+                const totalLectures = parseInt(document.getElementById('totalLectures').value) || 0;
+                const lecturesAttended = parseInt(document.getElementById('lecturesAttended').value) || 0;
+                const percentage = parseInt(document.getElementById('percentage').value) || 75;
+
+                // Placeholder for demonstration purposes
+                const present = lecturesAttended;
+                const total = totalLectures;
+
+                if (present <= 0 || total <= 0 || present > total) {
+                    return (resultArea.innerText = "Please Enter correct values");
+                }
+
+                if (present / total >= percentage / 100) {
+                    const daysAvailableToBunk = daysToBunk(present, total, percentage);
+                    return (resultArea.innerHTML = daysToBunkText(
+                        daysAvailableToBunk,
+                        present,
+                        total
+                    ));
+                }
+
+                const attendanceNeeded = reqAttendance(present, total, percentage);
+                return (resultArea.innerHTML = daysToAttendClassText(
+                    attendanceNeeded,
+                    present,
+                    total,
+                    percentage
+                ));
+            }
+        }
+
+        const reqAttendance = (present, total, percentage) => {
+            return Math.ceil((percentage * total - 100 * present) / (100 - percentage));
+        };
+
+        const daysToBunk = (present, total, percentage) => {
+            return Math.floor((100 * present - percentage * total) / percentage);
+        };
+
+        const daysToBunkText = (daysAvailableToBunk, present, total) =>
+            `You can leave <strong>${daysAvailableToBunk}</strong> more lectures.<br>Current Attendance: <strong>${present}/${total}</strong> -> <strong>${(
+                (present / total) *
+                100
+            ).toFixed(2)}%</strong><br>Attendance After leaving: <strong>${present}/${
+                daysAvailableToBunk + total
+            }</strong> -> <strong>${(
+                (present / (daysAvailableToBunk + total)) *
+                100
+            ).toFixed(2)}%</strong>`;
+
+        const daysToAttendClassText = (attendanceNeeded, present, total, percentage) =>
+            `You need to attend <strong>${attendanceNeeded}</strong> more classes to attain ${percentage}% attendance<br>Current Attendance: <strong>${present}/${total}</strong> ->  <strong>${(
+                (present / total) *
+                100
+            ).toFixed(2)}%</strong><br>Attendance Required: <strong>${
+                attendanceNeeded + present
+            }/${attendanceNeeded + total}</strong> -> <strong>${(
+                ((attendanceNeeded + present) / (attendanceNeeded + total)) *
+                100
+            ).toFixed(2)}%</strong>`;
+    </script>
+</body>
+</html>
