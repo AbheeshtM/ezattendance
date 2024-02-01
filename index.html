@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZAttend - Attendance Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>EZAttend - Attendance Calculator</h1>
+        <p>Manage your attendance with EZAttend</p>
+    </header>
+
+    <div class="calculator-section">
+        <label for="calculationMethod">Choose calculation method:</label>
+        <select id="calculationMethod" onchange="toggleInputs()">
+            <option value="1">Calculate by date</option>
+            <option value="2">Calculate by number of lectures</option>
+        </select>
+
+        <div id="dateInputFields" style="display: none;">
+            <label for="startDate">Enter the start date:</label>
+            <input type="date" id="startDate" name="startDate">
+
+            <label for="endDate">Enter the end date:</label>
+            <input type="date" id="endDate" name="endDate">
+        </div>
+
+        <div id="lecturesInputFields" style="display: none;">
+            <label for="totalLectures">Enter the total number of lectures:</label>
+            <input type="text" id="totalLectures" name="totalLectures" placeholder="Enter Here">
+
+            <label for="lecturesAttended">Enter the number of lectures attended:</label>
+            <input type="text" id="lecturesAttended" name="lecturesAttended" placeholder="Enter Here">
+
+            <label for="percentage">Enter the minimum attendance percentage:</label>
+            <input type="text" id="percentage" name="percentage" placeholder="Enter Here">
+        </div>
+
+        <button onclick="calculateAttendance()">Calculate Attendance</button>
+
+        <pre id="resultArea"></pre>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
